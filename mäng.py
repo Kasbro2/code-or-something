@@ -17,6 +17,7 @@ font = pygame.font.Font(None, 36)
 posX, posY = screenX / 2, screenY / 2
 speedX, speedY = 2, 2
 directionX, directionY = 0, 0
+lastDirectionX, lastDirectionY = 0, 0  # Store the last valid direction
 #enemy - tekitame 5 suvalist vaenlast
 enemies = []
 for i in range(5):
@@ -29,6 +30,7 @@ gameover = False
 enemyCounter = 0
 totalEnemies = 60
 score = 0
+winning_score = 20
 
 while not gameover:
     clock.tick(60)
@@ -37,16 +39,16 @@ while not gameover:
         if event.type == pygame.QUIT:
             gameover = True
 
-        # klahvivajutus
+            # klahvivajutus
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
-                directionX = "move_right"
+                lastDirectionX = directionX = "move_right"
             elif event.key == pygame.K_LEFT:
-                directionX = "move_left"
+                lastDirectionX = directionX = "move_left"
             elif event.key == pygame.K_UP:
-                directionY = "move_up"
+                lastDirectionY = directionY = "move_up"
             elif event.key == pygame.K_DOWN:
-                directionY = "move_down"
+                lastDirectionY = directionY = "move_down"
 
         # klahvivajutuse vabastamine
         elif event.type == pygame.KEYUP:
@@ -62,10 +64,23 @@ while not gameover:
     elif directionX == "move_right":
         if posX + 30 < screenX:
             posX += 3
+    elif lastDirectionX == "move_left":  # Continue moving in the last valid direction
+        if posX > 0:
+            posX -= 3
+    elif lastDirectionX == "move_right":
+        if posX + 30 < screenX:
+            posX += 3
+
     if directionY == "move_up":
         if posY > 0:
             posY -= 3
     elif directionY == "move_down":
+        if posY + 30 < screenY:
+            posY += 3
+    elif lastDirectionY == "move_up":  # Continue moving in the last valid direction
+        if posY > 0:
+            posY -= 3
+    elif lastDirectionY == "move_down":
         if posY + 30 < screenY:
             posY += 3
 
@@ -92,8 +107,23 @@ while not gameover:
     print(score)
     score_text = font.render("Score: " + str(score), True, "Blue" )
     screen.blit(score_text, (10, 10))
-    if score == 20:
-        gameover = True
+
+
+    if score >= winning_score:
+        win_text = font.render("You Win!", True, (0, 255, 0))
+        screen.blit(win_text, (screenX // 2 - win_text.get_width() // 2, screenY // 2 - win_text.get_height() // 2))
+        pygame.display.flip()
+        pygame.time.wait(2000)  # Wait for 2 seconds before quitting the game
+        break
+
+    if gameover:
+        gameover_text = font.render("Game Over", True, (255, 0, 0))
+        screen.blit(gameover_text,
+                    (screenX // 2 - gameover_text.get_width() // 2, screenY // 2 - gameover_text.get_height() // 2))
+        pygame.display.flip()
+        pygame.time.wait(2000)  # Wait for 2 seconds before quitting the game
+        break
+
 
 
 
